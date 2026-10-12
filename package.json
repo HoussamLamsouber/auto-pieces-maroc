@@ -1,0 +1,1 @@
+{"name":"auto-pieces-maroc","private":true,"version":"1.0.0","scripts":{"start":"node server.cjs"},"engines":{"node":">=22.13.0"}}
