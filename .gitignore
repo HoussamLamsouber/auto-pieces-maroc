@@ -19,3 +19,5 @@ Thumbs.db
 
 .vercel/
 .vercel-preview/
+
+.vercel-cloud/

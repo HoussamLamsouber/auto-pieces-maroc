@@ -1,12 +1,36 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
-  "installCommand": "",
-  "buildCommand": "node scripts/build-preview.cjs",
-  "outputDirectory": ".vercel-preview",
+  "installCommand": "npm ci",
+  "buildCommand": "node scripts/build-cloud.cjs",
+  "outputDirectory": ".vercel-cloud",
   "rewrites": [
-    { "source": "/api/products", "destination": "/catalogue-preview.json" },
-    { "source": "/api/session", "destination": "/session-preview.json" },
-    { "source": "/admin", "destination": "/admin.html" }
+    {
+      "source": "/admin",
+      "destination": "/admin.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "no-referrer"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://kzntoglknlllhllstctg.supabase.co; connect-src 'self' https://kzntoglknlllhllstctg.supabase.co wss://kzntoglknlllhllstctg.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+        }
+      ]
+    }
   ]
 }

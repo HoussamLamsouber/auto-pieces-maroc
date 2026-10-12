@@ -3,7 +3,7 @@ const root=path.resolve(__dirname,'..'),out=path.join(root,'.vercel-preview');
 const products=JSON.parse(fs.readFileSync(path.join(root,'preview/catalogue.json'),'utf8'));
 // Vercel fournit un répertoire de build neuf ; seuls les fichiers publics sont copiés.
 fs.mkdirSync(out,{recursive:true});
-for(const file of ['index.html','style.css','app.js'])fs.copyFileSync(path.join(root,'dist',file),path.join(out,file));
+for(const file of ['index.html','style.css','app.js','shop-api.js'])fs.copyFileSync(path.join(root,'dist',file),path.join(out,file));
 for(const name of ['photo-0.png','photo-1.jpg']){fs.mkdirSync(path.join(out,'assets'),{recursive:true});fs.copyFileSync(path.join(root,'dist/assets',name),path.join(out,'assets',name));}
 for(const p of products){
  if(!/^(assets\/photo-\d+\.(jpg|png)|uploads\/[a-f0-9]{32}\.(jpg|png|webp))$/.test(p.image))throw Error('Chemin image invalide');

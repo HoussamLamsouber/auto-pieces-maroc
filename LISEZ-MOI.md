@@ -47,3 +47,18 @@ Pour actualiser l’aperçu après modification des pièces dans l’admin local
 3. Laisser Vercel redéployer le commit.
 
 Seules les pièces visibles et non supprimées sont exportées. Le dossier preview contient des données et photos destinées à être visibles par le client : ne pas y ajouter de secrets. La base, les comptes et les sessions restent exclus de Git. Le panier et les liens WhatsApp restent actifs et dirigent vers le véritable numéro du vendeur.
+
+## Connexion Supabase préparée
+
+La configuration Vercel construit maintenant la boutique et l’administration Supabase. Elle ne doit être envoyée sur GitHub qu’après la préparation du projet en ligne.
+
+Ordre d’activation :
+1. Exécuter supabase/01-schema.sql dans le SQL Editor Supabase.
+2. Exécuter data/02-import-catalogue.sql dans le même SQL Editor. Cet export contient les 25 pièces locales au moment de la préparation, y compris la corbeille. Il n’inclut aucun compte local. En cas de modification locale avant import, le régénérer avec node scripts/export-supabase.cjs.
+3. Dans Authentication / Users, créer un utilisateur par e-mail. Autoriser son UUID en suivant supabase/INSTALLATION.md. Le compte local et son mot de passe ne sont pas transférés.
+4. Vérifier les politiques avec un visiteur anonyme et le compte administrateur, puis envoyer les fichiers modifiés et package-lock.json sur GitHub. Vercel exécutera npm ci puis scripts/build-cloud.cjs.
+5. Utiliser exclusivement https://auto-pieces-maroc.vercel.app/admin pour les ajouts en ligne. Le serveur local reste indépendant : les changements faits sur SQLite ne sont pas synchronisés avec Supabase.
+
+Les nouvelles photos seront envoyées dans le bucket public product-images. Les photos de la migration sont servies avec les fichiers du site ; ne pas supprimer les dossiers assets et uploads du build. La clé publishable dans supabase/public-config.json est publique ; les permissions sont appliquées par Supabase (RLS), pas par la visibilité des boutons. Aucune clé service_role n’est nécessaire dans le site.
+
+L’affichage du catalogue relit les données à chaque ouverture/actualisation. Il n’est pas nécessaire de faire un export ni un push Git après l’ajout d’une pièce depuis l’admin en ligne.

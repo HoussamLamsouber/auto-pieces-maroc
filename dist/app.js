@@ -5,14 +5,14 @@ if(location.protocol!=='file:'){
  try{if(fromAdmin)sessionStorage.setItem('apm-from-admin','1');fromAdmin=fromAdmin||sessionStorage.getItem('apm-from-admin')==='1';}catch{}
  if(fromAdmin){
   const back=document.createElement('a');back.className='admin-return';back.href='/admin.html';back.textContent='← Retour à l’administration';back.hidden=true;document.querySelector('header').append(back);
-  async function checkAdmin(){try{const r=await fetch('/api/session',{cache:'no-store'});const s=await r.json();back.hidden=!s.authenticated;if(!s.authenticated){try{sessionStorage.removeItem('apm-from-admin');}catch{}}}catch{back.hidden=true;}}
+  async function checkAdmin(){try{const r=await window.shopRequest('/api/session',{cache:'no-store'});const s=await r.json();back.hidden=!s.authenticated;if(!s.authenticated){try{sessionStorage.removeItem('apm-from-admin');}catch{}}}catch{back.hidden=true;}}
   await checkAdmin();window.addEventListener('pageshow',checkAdmin);window.addEventListener('focus',checkAdmin);document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkAdmin();});setInterval(checkAdmin,30000);
  }
 }
 
 if(location.protocol==='file:'){const notice=document.createElement('p');notice.className='local-notice';notice.textContent='Copie statique : pour consulter le catalogue actualisé, lancez LANCER.cmd puis ouvrez la boutique sur http://127.0.0.1:4174/.';document.querySelector('main').prepend(notice);}
 if(location.protocol!=='file:'){
- try{const response=await fetch('/api/products',{cache:'no-store'});if(!response.ok)throw Error('Catalogue indisponible');PRODUCTS=await response.json();}
+ try{const response=await window.shopRequest('/api/products',{cache:'no-store'});if(!response.ok)throw Error('Catalogue indisponible');PRODUCTS=await response.json();}
  catch{document.querySelector('#products').textContent='Le catalogue est momentanément indisponible. Actualisez la page pour réessayer.';return;}
 }
 
