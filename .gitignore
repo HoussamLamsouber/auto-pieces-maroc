@@ -16,3 +16,6 @@ data/
 node_modules/
 .DS_Store
 Thumbs.db
+
+.vercel/
+.vercel-preview/

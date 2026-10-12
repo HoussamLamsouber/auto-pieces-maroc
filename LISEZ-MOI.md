@@ -34,3 +34,16 @@ Cette version est locale, pas encore publiée. Elle utilise un serveur Node.js e
 Un seul compte admin est prévu. La récupération du mot de passe par e-mail et plusieurs comptes ne sont pas encore implémentés. Le bouton Supprimer déplace la fiche dans la corbeille : efface = Oui et date_suppression en UTC. La corbeille permet de restaurer la fiche avec efface = Non et visibilité désactivée. La dernière date de suppression est conservée après restauration. Les fichiers photo sont conservés pour ne pas supprimer une image utilisée par une autre pièce.
 
 Le dossier .openai provient d’une ancienne tentative de publication statique et ne configure pas ce serveur. Publier uniquement dist ne déploie pas l’administration.
+
+## Aperçu client sur Vercel
+
+vercel.json configure un aperçu statique construit par scripts/build-preview.cjs dans .vercel-preview. La configuration conserve les appels du catalogue via deux réécritures vers des fichiers JSON publics. Elle ne déploie pas le serveur SQLite.
+
+Dans Vercel : Root Directory = racine du dépôt, Framework Preset = Other. Le fichier vercel.json fournit la commande de build et le répertoire de sortie. L’administration locale reste accessible via LANCER.cmd ; l’administration de l’aperçu affiche une explication.
+
+Pour actualiser l’aperçu après modification des pièces dans l’admin locale :
+1. Exécuter `node scripts/export-preview.cjs` dans le dossier du projet.
+2. Ajouter les changements de preview à Git et les envoyer sur GitHub.
+3. Laisser Vercel redéployer le commit.
+
+Seules les pièces visibles et non supprimées sont exportées. Le dossier preview contient des données et photos destinées à être visibles par le client : ne pas y ajouter de secrets. La base, les comptes et les sessions restent exclus de Git. Le panier et les liens WhatsApp restent actifs et dirigent vers le véritable numéro du vendeur.

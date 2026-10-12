@@ -1,0 +1,12 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "",
+  "buildCommand": "node scripts/build-preview.cjs",
+  "outputDirectory": ".vercel-preview",
+  "rewrites": [
+    { "source": "/api/products", "destination": "/catalogue-preview.json" },
+    { "source": "/api/session", "destination": "/session-preview.json" },
+    { "source": "/admin", "destination": "/admin.html" }
+  ]
+}
