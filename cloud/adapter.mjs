@@ -4,7 +4,7 @@ export function createAdapter(client){
  async function isAdmin(){const {data,error}=await client.auth.getUser();if(error||!data.user)return false;const r=await client.from('apm_admins').select('user_id').eq('user_id',data.user.id).maybeSingle();if(r.error)fail(503,'Configuration Supabase incomplète : vérifiez le script SQL.');return !!r.data;}
  async function all(query){let results=[];for(let offset=0;;offset+=500){const rows=checked(await query().range(offset,offset+499));results.push(...rows);if(rows.length<500)return results;}}
  const fields='id,name,ref,category,price,image,description,availability,active,version,efface,date_suppression';
- function payload(p){return {name:p.name,ref:p.ref,category:p.category,price:p.price,image:p.image,description:p.description,availability:p.availability,active:p.active};}
+ function payload(p){if(!['Refroidissement','Moteur','Transmission','Distribution'].includes(p.category))fail(400,'Choisissez une catégorie de la liste.');return {name:p.name,ref:p.ref,category:p.category,price:p.price,image:p.image,description:p.description,availability:p.availability,active:p.active};}
  return async function request(route,options={}){
   try{
    const url=new URL(route,'https://shop.local'),method=options.method||'GET';
@@ -14,15 +14,6 @@ export function createAdapter(client){
     const authenticated=await isAdmin();
     const user=authenticated?(await client.auth.getUser()).data.user:null;
     return respond({authenticated,needsSetup:false,username:authenticated?String(user?.user_metadata?.username||'Administrateur'):null});
-   }
-   if(url.pathname==='/api/register'&&method==='POST'){
-    const username=String(p.username||'').trim().toLowerCase();
-    if(!/^[a-z0-9_.-]{3,40}$/.test(username))fail(400,'Identifiant : 3 à 40 lettres sans accents, chiffres, points, tirets ou underscores.');
-    if(typeof p.password!=='string'||p.password.length<12)fail(400,'Le mot de passe doit contenir au moins 12 caractères.');
-    const {error}=await client.auth.signUp({email:p.email,password:p.password,options:{data:{username}}});
-    if(error)fail(400,'Création impossible. Vérifiez les informations, essayez un autre identifiant ou réessayez plus tard.');
-    await client.auth.signOut();
-    return respond({ok:true});
    }
    if(url.pathname==='/api/login'&&method==='POST'){
     const {error}=await client.auth.signInWithPassword({email:p.username,password:p.password});
@@ -47,6 +38,13 @@ export function createAdapter(client){
     return respond({image:client.storage.from('product-images').getPublicUrl(filename).data.publicUrl},201);
    }
    if(url.pathname==='/api/admin/products'&&method==='POST')return respond(checked(await client.from('products').insert(payload(p)).select('id').single()),201);
+   const permanent=url.pathname.match(/^\/api\/admin\/products\/(\d+)\/permanent$/);
+   if(permanent&&method==='DELETE'){
+    if(!Number.isInteger(p.version))fail(400,'Version invalide.');
+    const rows=checked(await client.from('products').delete().eq('id',Number(permanent[1])).eq('version',p.version).eq('efface','Oui').select('id'));
+    if(!rows.length)fail(409,'Cette pièce a changé ou ne se trouve plus dans la corbeille. Actualisez la liste.');
+    return respond({ok:true});
+   }
    const match=url.pathname.match(/^\/api\/admin\/products\/(\d+)(\/restore)?$/);
    if(match){
     if(!Number.isInteger(p.version))fail(400,'Version invalide.');
