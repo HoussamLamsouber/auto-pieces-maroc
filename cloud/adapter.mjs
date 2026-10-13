@@ -10,7 +10,20 @@ export function createAdapter(client){
    const url=new URL(route,'https://shop.local'),method=options.method||'GET';
    const p=options.body?JSON.parse(options.body):{};
    if(url.pathname==='/api/products'&&method==='GET')return respond(await all(()=>client.from('products').select(fields).eq('active',true).eq('efface','Non').order('id')));
-   if(url.pathname==='/api/session')return respond({authenticated:await isAdmin(),needsSetup:false});
+   if(url.pathname==='/api/session'){
+    const authenticated=await isAdmin();
+    const user=authenticated?(await client.auth.getUser()).data.user:null;
+    return respond({authenticated,needsSetup:false,username:authenticated?String(user?.user_metadata?.username||'Administrateur'):null});
+   }
+   if(url.pathname==='/api/register'&&method==='POST'){
+    const username=String(p.username||'').trim().toLowerCase();
+    if(!/^[a-z0-9_.-]{3,40}$/.test(username))fail(400,'Identifiant : 3 à 40 lettres sans accents, chiffres, points, tirets ou underscores.');
+    if(typeof p.password!=='string'||p.password.length<12)fail(400,'Le mot de passe doit contenir au moins 12 caractères.');
+    const {error}=await client.auth.signUp({email:p.email,password:p.password,options:{data:{username}}});
+    if(error)fail(400,'Création impossible. Vérifiez les informations, essayez un autre identifiant ou réessayez plus tard.');
+    await client.auth.signOut();
+    return respond({ok:true});
+   }
    if(url.pathname==='/api/login'&&method==='POST'){
     const {error}=await client.auth.signInWithPassword({email:p.username,password:p.password});
     if(error)fail(401,'Adresse e-mail ou mot de passe incorrect.');
